@@ -1,0 +1,63 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+# Sample employee data
+employees = [
+    {"id": 101, "name": "Alice Johnson", "department": "AI Research", "email": "alice.j@ibm.com"},
+    {"id": 102, "name": "Bob Smith", "department": "Cloud Services", "email": "bob.s@ibm.com"},
+    {"id": 103, "name": "Carol Lee", "department": "Quantum Computing", "email": "carol.l@ibm.com"},
+    {"id": 104, "name": "David Kim", "department": "Cybersecurity", "email": "david.k@ibm.com"},
+]
+
+# HTML template embedded as a string
+template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IBM Employee Directory</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        h1 { color: #0b3d91; }
+        input[type="text"] { padding: 8px; width: 300px; }
+        button { padding: 8px 12px; }
+        table { border-collapse: collapse; width: 80%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>IBM Employee Directory</h1>
+    <form method="POST" action="/search">
+        <input type="text" name="query" placeholder="Search by name or department">
+        <button type="submit">Search</button>
+    </form>
+    <table>
+        <tr>
+            <th>ID</th><th>Name</th><th>Department</th><th>Email</th>
+        </tr>
+        {% for emp in employees %}
+        <tr>
+            <td>{{ emp.id }}</td>
+            <td>{{ emp.name }}</td>
+            <td>{{ emp.department }}</td>
+            <td>{{ emp.email }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+"""
+
+@app.route('/')
+def index():
+    return render_template_string(template, employees=employees)
+
+@app.route('/search', methods=['POST'])
+def search():
+    query = request.form['query'].lower()
+    filtered = [emp for emp in employees if query in emp['name'].lower() or query in emp['department'].lower()]
+    return render_template_string(template, employees=filtered)
+
+if __name__ == '__main__':
+    app.run(debug=True)
